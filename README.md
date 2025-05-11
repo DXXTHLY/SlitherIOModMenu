@@ -24,15 +24,14 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
 
 ```javascript
 // ==UserScript==
-// @name         Slither.io Enhanced Zoom Control
+// @name         Slither.io DXXTHLY
 // @namespace    http://tampermonkey.net/
-// @version      1.3
-// @description  Enhanced zoom controls for Slither.io (Z=zoom in, X=zoom out, C=reset to default)
-// @author       DXXTHLY GITHUB
-// @match        http://slither.io/
-// @match        https://slither.io/
+// @version      1.2
+// @description  Press z to zoom in, x to zoom out, and c to let zoom drift with game.
+// @author       GITHUB DXXTHLY
+// @match        http://slither.com/io
 // @grant        none
-// @license      MIT
+// @comment Press z to zoom in, x to zoom out, and c to let zoom drift with game.
 // ==/UserScript==
 
 (function() {
