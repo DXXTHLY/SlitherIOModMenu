@@ -24,10 +24,10 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
 
 ```javascript// ==UserScript==
 // ==UserScript==
-// @name         DSC.GG/143X ULTIMATE MOD MENU (Stable v9.0)
+// @name         DSC.GG/143X ULTIMATE MOD MENU (Stable v9.1)
 // @namespace    http://tampermonkey.net/
-// @version      9.0
-// @description  Ultimate Slither.io Mod Menu, all features actually work!
+// @version      9.1
+// @description  Ultimate Slither.io Mod Menu - Optimized & Fixed!
 // @author       GITHUB.COM/DXXTHLY - HTTPS://DSC.GG/143X | waynesg
 // @match        http://slither.io/
 // @match        https://slither.io/
@@ -46,7 +46,8 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
         circleRadiusStep: 20,
         minCircleRadius: 50,
         maxCircleRadius: 300,
-        deathSoundURL: 'https://www.myinstants.com/media/sounds/minecraft-death-sound.mp3'
+        deathSoundURL: 'https://www.myinstants.com/media/sounds/minecraft-death-sound.mp3',
+        godModeVideoURL: 'https://youtu.be/ghAap5IWu1Y'
     };
 
     // === STATE ===
@@ -58,9 +59,6 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
             deathSound: true,
             fpsDisplay: false,
             autoBoost: false,
-            minimap: false,
-            noGlow: false,
-            quickRespawn: false,
             showServer: false,
         },
         menuVisible: true,
@@ -73,7 +71,6 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
         isInGame: false,
         boosting: false,
         autoCircleAngle: 0,
-        minimapCanvas: null,
         ping: 0,
         server: '',
         leaderboard: [],
@@ -156,31 +153,12 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
     circleVisual.style.transition = 'all 0.2s ease';
     document.body.appendChild(circleVisual);
 
-    // Minimap overlay
-    function createMinimap() {
-        if (state.minimapCanvas) return;
-        const canvas = document.createElement('canvas');
-        canvas.width = 160;
-        canvas.height = 160;
-        canvas.style.position = 'fixed';
-        canvas.style.left = '10px';
-        canvas.style.bottom = '10px';
-        canvas.style.zIndex = '9999';
-        canvas.style.background = 'rgba(0,0,0,0.5)';
-        canvas.style.border = '2px solid #4CAF50';
-        canvas.style.borderRadius = '10px';
-        canvas.style.display = 'none';
-        document.body.appendChild(canvas);
-        state.minimapCanvas = canvas;
-    }
-    createMinimap();
-
     // === MENU CONTENT ===
     function updateMenu() {
         menu.innerHTML = `
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
                 <h2 style="margin:0;color:#4CAF50;">GAY MANS MOD MENU</h2>
-                <div style="color:#aaa;font-size:12px">v9.0</div>
+                <div style="color:#aaa;font-size:12px">v9.1</div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom:15px">
                 <div>
@@ -198,14 +176,12 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
                     <h3 style="color:#4CAF50;border-bottom:1px solid #444;padding-bottom:5px;margin-top:0">VISUALS</h3>
                     <p><strong>1-3: Performance Mode</strong> <span style="color:${['lime','cyan','orange'][state.features.performanceMode-1] || '#aaa'}">${['Low: Minimal','Medium: Balanced','High: Quality'][state.features.performanceMode-1] || 'Off'}</span></p>
                     <p><strong>F: FPS Display:</strong> <span style="color:${state.features.fpsDisplay ? 'lime' : 'red'}">${state.features.fpsDisplay ? 'ON' : 'OFF'}</span></p>
-                    <p><strong>N: UPDATING:</strong> <span style="color:${state.features.minimap ? 'lime' : 'red'}">${state.features.minimap ? 'ON' : 'OFF'}</span></p>
-                    <p><strong>V: UPDATING:</strong> <span style="color:${state.features.deathSound ? 'lime' : 'red'}">${state.features.deathSound ? 'ON' : 'OFF'}</span></p>
-                    <p><strong>U: UPDATING</strong></p>
-                    <p><strong>H: UPDATING:</strong> <span style="color:${state.features.noGlow ? 'lime' : 'red'}">${state.features.noGlow ? 'ON' : 'OFF'}</span></p>
+                    <p><strong>V: Death Sound:</strong> <span style="color:${state.features.deathSound ? 'lime' : 'red'}">${state.features.deathSound ? 'ON' : 'OFF'}</span></p>
                     <p><strong>T: Show Server IP:</strong> <span style="color:${state.features.showServer ? 'lime' : 'red'}">${state.features.showServer ? 'ON' : 'OFF'}</span></p>
                     <h3 style="color:#4CAF50;border-bottom:1px solid #444;padding-bottom:5px;margin-top:15px">LINKS</h3>
                     <p><strong>G: GitHub</strong></p>
                     <p><strong>D: Discord</strong></p>
+                    <p><strong>Y: GODMODE</strong></p>
                 </div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;background:rgba(76, 175, 80, 0.1);padding:10px;border-radius:5px;margin-bottom:15px">
@@ -283,9 +259,7 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
         }
     }, true);
 
-    // =====================
-    // Auto Circle: Move mouse in a real circle
-    // =====================
+    // === FIXED AUTO CIRCLE (now stays smooth) ===
     function autoCircle() {
         if (!state.features.autoCircle || !state.isInGame) return;
         state.autoCircleAngle += 0.04;
@@ -303,17 +277,15 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
             });
             canvas.dispatchEvent(event);
         }
+        autoCircleRAF = requestAnimationFrame(autoCircle);
     }
 
-
-
-    // === AUTO BOOST: Works on both slither.io and slither.com/io ===
+    // === AUTO BOOST ===
     function autoBoost() {
         if (!state.features.autoBoost || !state.isInGame) {
             if (state.boosting) {
                 state.boosting = false;
                 if (typeof window.setAcceleration === 'function') window.setAcceleration(0);
-                // fallback for slither.io
                 document.dispatchEvent(new KeyboardEvent('keyup', { key: ' ' }));
             }
             return;
@@ -321,37 +293,9 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
         if (!state.boosting) {
             state.boosting = true;
             if (typeof window.setAcceleration === 'function') window.setAcceleration(1);
-            // fallback for slither.io
             document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
         }
     }
-
-    // === MINIMAP (shows your snake as a white dot) ===
-    function drawMinimap() {
-        if (!state.minimapCanvas) return;
-        if (state.features.minimap && state.isInGame) {
-            state.minimapCanvas.style.display = 'block';
-            const ctx = state.minimapCanvas.getContext('2d');
-            ctx.clearRect(0, 0, state.minimapCanvas.width, state.minimapCanvas.height);
-            ctx.strokeStyle = "#4CAF50";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(0, 0, 160, 160);
-            if (window.snake && typeof window.snake.xx === "number" && typeof window.snake.yy === "number") {
-                const mapSize = 21600;
-                const scale = 160 / mapSize;
-                const x = window.snake.xx * scale;
-                const y = window.snake.yy * scale;
-                ctx.fillStyle = "#fff";
-                ctx.beginPath();
-                ctx.arc(x, y, 5, 0, 2 * Math.PI);
-                ctx.fill();
-            }
-        } else {
-            state.minimapCanvas.style.display = 'none';
-        }
-        requestAnimationFrame(drawMinimap);
-    }
-    drawMinimap();
 
     // === FPS COUNTER ===
     function fpsCounter() {
@@ -369,18 +313,16 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
     }
     fpsCounter();
 
-    // === DEATH SOUND (robust: plays on death overlay and snake death) ===
+    // === DEATH SOUND ===
     function deathSoundObserver() {
         let lastState = true;
         setInterval(() => {
             if (!state.features.deathSound) return;
-            // Play sound if snake just died
             if (window.snake && lastState && !window.snake.alive) {
                 state.deathSound.pause();
                 state.deathSound.currentTime = 0;
                 state.deathSound.play();
             }
-            // Play sound if "died" overlay appears
             const died = document.getElementById('died');
             if (died && died.style.display !== 'none' && lastState) {
                 state.deathSound.pause();
@@ -396,17 +338,6 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
         state.deathSound.currentTime = 0;
     });
     deathSoundObserver();
-
-    // === NO GLOW (removes snake glow for FPS, works on .io and .com) ===
-    function noGlowLoop() {
-        if (state.features.noGlow && window.snakes) {
-            for (let s of window.snakes) {
-                if (s && s.rbcs !== undefined) s.rbcs = 0;
-            }
-        }
-        requestAnimationFrame(noGlowLoop);
-    }
-    noGlowLoop();
 
     // === PERFORMANCE MODES ===
     function applyPerformanceMode() {
@@ -477,15 +408,6 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
         }
     });
 
-    // === QUICK RESPAWN (U) ===
-    document.addEventListener('keydown', function (e) {
-        if (e.key.toLowerCase() === 'u' && !state.isInGame) {
-            const playBtn = document.getElementById('playh');
-            if (playBtn) playBtn.click();
-            else if (typeof window.play_btn_click === 'function') window.play_btn_click();
-        }
-    });
-
     // === GET SERVER IP ===
     function getServerIP() {
         if (window.bso && window.bso.ip) {
@@ -500,7 +422,6 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
 
     // === GET LEADERBOARD ===
     function getLeaderboard() {
-        // Try to get leaderboard names from the DOM
         const lb = [];
         for (let i = 1; i <= 3; ++i) {
             const el = document.getElementById('lb' + i);
@@ -512,7 +433,6 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
 
     // === MAIN LOOPS ===
     function mainLoop() {
-        if (state.features.autoCircle && state.isInGame) autoCircle();
         autoBoost();
         requestAnimationFrame(mainLoop);
     }
@@ -541,7 +461,7 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
             case 'a':
                 state.features.autoCircle = !state.features.autoCircle;
                 if (state.features.autoCircle) {
-                    if (!autoCircleRAF) autoCircle();
+                    autoCircle();
                 } else {
                     if (autoCircleRAF) {
                         cancelAnimationFrame(autoCircleRAF);
@@ -550,8 +470,6 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
                 }
                 updateMenu();
                 break;
-
-
             case 'b':
                 state.features.autoBoost = !state.features.autoBoost;
                 updateMenu();
@@ -579,16 +497,8 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
                 fpsDisplay.style.display = state.features.fpsDisplay ? 'block' : 'none';
                 updateMenu();
                 break;
-            case 'n':
-                state.features.minimap = !state.features.minimap;
-                updateMenu();
-                break;
             case 'v':
                 state.features.deathSound = !state.features.deathSound;
-                updateMenu();
-                break;
-            case 'h':
-                state.features.noGlow = !state.features.noGlow;
                 updateMenu();
                 break;
             case 't':
@@ -601,12 +511,14 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
             case 'd':
                 window.open('https://dsc.gg/143x', '_blank');
                 break;
+            case 'y': // GODMODE Easter Egg
+                window.open(config.godModeVideoURL, '_blank');
+                break;
         }
     });
 
     // === INITIAL SETUP ===
     applyPerformanceMode();
-
 })();
 
 
