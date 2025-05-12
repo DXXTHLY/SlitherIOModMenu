@@ -1,4 +1,4 @@
-# Slither.io Enhanced Zoom Control
+# Slither.io Enhanced Mod Menu by DSC.GG/143X
 
 ![image](https://github.com/user-attachments/assets/422fcf2c-80e4-4660-9b4a-06867237537e)
 
