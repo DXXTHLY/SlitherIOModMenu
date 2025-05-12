@@ -24,11 +24,11 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
 
 ```javascript
 // ==UserScript==
-// @name         DSC.GG/143X ULTIMATE MOD MENU
+// @name         DSC.GG/143X ULTIMATE MOD MENU (Stable v9.0)
 // @namespace    http://tampermonkey.net/
-// @version      7.9
-// @description  Ultimate Slither.io Mod Menu with Circle Restriction, Auto-Circle, Zoom, Performance Modes, Minimap, and more!
-// @author       GITHUB.COM/DXXTHLY - HTTPS://DSC.GG/143X
+// @version      9.0
+// @description  Ultimate Slither.io Mod Menu, all features actually work!
+// @author       GITHUB.COM/DXXTHLY - HTTPS://DSC.GG/143X | waynesg
 // @match        http://slither.io/
 // @match        https://slither.io/
 // @match        http://slither.com/io
@@ -39,9 +39,7 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
 (function () {
     'use strict';
 
-    // =====================
-    // Configuration
-    // =====================
+    // === CONFIG ===
     const config = {
         menuPosition: 'right',
         defaultCircleRadius: 150,
@@ -51,19 +49,19 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
         deathSoundURL: 'https://www.myinstants.com/media/sounds/minecraft-death-sound.mp3'
     };
 
-    // =====================
-    // State object
-    // =====================
+    // === STATE ===
     const state = {
         features: {
             circleRestriction: false,
             autoCircle: false,
-            performanceMode: 0,
-            deathSound: false,
+            performanceMode: 1,
+            deathSound: true,
             fpsDisplay: false,
             autoBoost: false,
-            rainbowSkin: false,
-            minimap: false
+            minimap: false,
+            noGlow: false,
+            quickRespawn: false,
+            showServer: false,
         },
         menuVisible: true,
         zoomFactor: 1.0,
@@ -74,19 +72,23 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
         deathSound: new Audio(config.deathSoundURL),
         isInGame: false,
         boosting: false,
-        lastSnakeAlive: true,
         autoCircleAngle: 0,
-        minimapCanvas: null
+        minimapCanvas: null,
+        ping: 0,
+        server: '',
+        leaderboard: [],
+        lastSnakeAlive: true,
+        boostingInterval: null,
     };
 
-    // =====================
-    // Create and style the menu
-    // =====================
+    let autoCircleRAF = null;
+
+    // === MENU CREATION ===
     const menu = document.createElement('div');
     menu.id = 'mod-menu';
     menu.style.position = 'fixed';
     menu.style.top = '50px';
-    menu.style.background = 'rgba(17, 17, 17, 0.9)';
+    menu.style.background = 'rgba(17, 17, 17, 0.92)';
     menu.style.border = '2px solid #4CAF50';
     menu.style.borderRadius = '10px';
     menu.style.padding = '20px';
@@ -94,11 +96,11 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
     menu.style.color = '#fff';
     menu.style.fontFamily = 'Arial, sans-serif';
     menu.style.fontSize = '14px';
-    menu.style.width = '450px';
+    menu.style.width = '460px';
     menu.style.boxShadow = '0 0 15px rgba(0,0,0,0.7)';
     menu.style.backdropFilter = 'blur(5px)';
     menu.style.transition = 'all 0.3s ease';
-
+    menu.style.userSelect = "text";
     if (config.menuPosition === 'left') {
         menu.style.left = '50px';
     } else if (config.menuPosition === 'center') {
@@ -124,6 +126,22 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
     fpsDisplay.style.padding = '5px 10px';
     fpsDisplay.style.borderRadius = '5px';
     document.body.appendChild(fpsDisplay);
+
+    // Ping display
+    const pingDisplay = document.createElement('div');
+    pingDisplay.id = 'ping-display';
+    pingDisplay.style.position = 'fixed';
+    pingDisplay.style.bottom = '35px';
+    pingDisplay.style.right = '10px';
+    pingDisplay.style.color = '#fff';
+    pingDisplay.style.fontFamily = 'Arial, sans-serif';
+    pingDisplay.style.fontSize = '14px';
+    pingDisplay.style.zIndex = '9999';
+    pingDisplay.style.display = 'block';
+    pingDisplay.style.background = 'rgba(0,0,0,0.5)';
+    pingDisplay.style.padding = '5px 10px';
+    pingDisplay.style.borderRadius = '5px';
+    document.body.appendChild(pingDisplay);
 
     // Circle restriction visual
     const circleVisual = document.createElement('div');
@@ -157,21 +175,19 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
     }
     createMinimap();
 
-    // =====================
-    // Menu Content
-    // =====================
+    // === MENU CONTENT ===
     function updateMenu() {
         menu.innerHTML = `
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
                 <h2 style="margin:0;color:#4CAF50;">GAY MANS MOD MENU</h2>
-                <div style="color:#aaa;font-size:12px">v7.9</div>
+                <div style="color:#aaa;font-size:12px">v9.0</div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom:15px">
                 <div>
                     <h3 style="color:#4CAF50;border-bottom:1px solid #444;padding-bottom:5px;margin-top:0">MOVEMENT</h3>
                     <p><strong>K: Circle Restriction:</strong> <span style="color:${state.features.circleRestriction ? 'lime' : 'red'}">${state.features.circleRestriction ? 'ON' : 'OFF'}</span></p>
                     <p><strong>J/L: Circle Size:</strong> ${state.circleRadius}px</p>
-                    <p><strong>A: Auto Circle:</strong> <span style="color:${state.features.autoCircle ? 'lime' : 'red'}">${state.features.autoCircle ? 'ON' : 'OFF'}</span></p>
+                    <p><strong>A: Auto Circle (left):</strong> <span style="color:${state.features.autoCircle ? 'lime' : 'red'}">${state.features.autoCircle ? 'ON' : 'OFF'}</span></p>
                     <p><strong>B: Auto Boost:</strong> <span style="color:${state.features.autoBoost ? 'lime' : 'red'}">${state.features.autoBoost ? 'ON' : 'OFF'}</span></p>
                     <h3 style="color:#4CAF50;border-bottom:1px solid #444;padding-bottom:5px;margin-top:15px">ZOOM</h3>
                     <p><strong>Z: Zoom In</strong></p>
@@ -180,41 +196,52 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
                 </div>
                 <div>
                     <h3 style="color:#4CAF50;border-bottom:1px solid #444;padding-bottom:5px;margin-top:0">VISUALS</h3>
-                    <p><strong>1-4: Performance Mode</strong> <span style="color:${state.features.performanceMode ? ['lime','cyan','orange','red'][state.features.performanceMode-1] : '#aaa'}">${state.features.performanceMode ? ['Low','Medium','High','Ultra'][state.features.performanceMode-1] : 'Off'}</span></p>
+                    <p><strong>1-3: Performance Mode</strong> <span style="color:${['lime','cyan','orange'][state.features.performanceMode-1] || '#aaa'}">${['Low: Minimal','Medium: Balanced','High: Quality'][state.features.performanceMode-1] || 'Off'}</span></p>
                     <p><strong>F: FPS Display:</strong> <span style="color:${state.features.fpsDisplay ? 'lime' : 'red'}">${state.features.fpsDisplay ? 'ON' : 'OFF'}</span></p>
-                    <p><strong>R: Rainbow Skin:</strong> <span style="color:${state.features.rainbowSkin ? 'lime' : 'red'}">${state.features.rainbowSkin ? 'ON' : 'OFF'}</span></p>
                     <p><strong>N: Minimap:</strong> <span style="color:${state.features.minimap ? 'lime' : 'red'}">${state.features.minimap ? 'ON' : 'OFF'}</span></p>
                     <p><strong>V: Death Sound:</strong> <span style="color:${state.features.deathSound ? 'lime' : 'red'}">${state.features.deathSound ? 'ON' : 'OFF'}</span></p>
+                    <p><strong>U: Quick Respawn</strong></p>
+                    <p><strong>H: No Glow:</strong> <span style="color:${state.features.noGlow ? 'lime' : 'red'}">${state.features.noGlow ? 'ON' : 'OFF'}</span></p>
+                    <p><strong>T: Show Server IP:</strong> <span style="color:${state.features.showServer ? 'lime' : 'red'}">${state.features.showServer ? 'ON' : 'OFF'}</span></p>
                     <h3 style="color:#4CAF50;border-bottom:1px solid #444;padding-bottom:5px;margin-top:15px">LINKS</h3>
                     <p><strong>G: GitHub</strong></p>
                     <p><strong>D: Discord</strong></p>
                 </div>
             </div>
-            <div style="background:rgba(76, 175, 80, 0.1);padding:10px;border-radius:5px;margin-bottom:15px">
-                <h3 style="color:#4CAF50;margin-top:0;margin-bottom:10px">STATUS</h3>
-                <p><strong>Game State:</strong> ${state.isInGame ? 'In Game' : 'Menu'}</p>
-                <p><strong>Zoom Level:</strong> ${Math.round(100 / state.zoomFactor)}%</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;background:rgba(76, 175, 80, 0.1);padding:10px;border-radius:5px;margin-bottom:15px">
+                <div>
+                    <h3 style="color:#4CAF50;margin-top:0;margin-bottom:10px">STATUS</h3>
+                    <p><strong>Game State:</strong> ${state.isInGame ? 'In Game' : 'Menu'}</p>
+                    <p><strong>Zoom:</strong> ${Math.round(100 / state.zoomFactor)}%</p>
+                    <p><strong>Ping:</strong> <span id="ping-value">${state.ping} ms</span></p>
+                    <p><strong>FPS:</strong> ${state.fps}</p>
+                </div>
+                <div>
+                    <h3 style="color:#4CAF50;margin-top:0;margin-bottom:10px">EXTRA</h3>
+                    <p><strong>Server:</strong> ${state.features.showServer ? (state.server || 'N/A') : 'Hidden'}</p>
+                    <p><strong>Leaderboard:</strong><br>
+                        ${state.leaderboard.length ? state.leaderboard.map((x,i)=>`${i+1}. ${x}`).join('<br>') : 'N/A'}
+                    </p>
+                </div>
             </div>
             <div style="text-align:center;font-size:12px;color:#aaa;border-top:1px solid #444;padding-top:10px">
-                Press <strong>M</strong> to hide/show menu | DSC.GG/143X
+                Press <strong>M</strong> to hide/show menu | DSC.GG/143X | <strong>P</strong> Screenshot<br>
+                <span style="color:#aaa;">Made by: <b>dxxthly.</b> & <b>waynesg</b> on Discord</span>
             </div>
         `;
     }
     updateMenu();
 
-    // =====================
-    // Track Game State
-    // =====================
+    // === GAME STATE DETECTION ===
     function checkGameState() {
         const gameCanvas = document.querySelector('canvas');
-        state.isInGame = !!(gameCanvas && gameCanvas.style.display !== 'none');
+        const loginForm = document.getElementById('login');
+        state.isInGame = !!(gameCanvas && gameCanvas.style.display !== 'none' && (!loginForm || loginForm.style.display === 'none'));
         setTimeout(checkGameState, 1000);
     }
     checkGameState();
 
-    // =====================
-    // Draw Circle Restriction (centered in viewport)
-    // =====================
+    // === CIRCLE RESTRICTION ===
     function drawCircleRestriction() {
         if (state.features.circleRestriction && state.isInGame) {
             const centerX = window.innerWidth / 2;
@@ -231,10 +258,7 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
     }
     drawCircleRestriction();
 
-    // =====================
-    // Circle Restriction Logic
-    // =====================
-    function restrictToCircle(e) {
+    document.addEventListener('mousemove', function restrictToCircle(e) {
         if (!state.features.circleRestriction || !state.isInGame) return;
         const centerX = window.innerWidth / 2;
         const centerY = window.innerHeight / 2;
@@ -242,6 +266,8 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
         const dy = e.clientY - centerY;
         const distance = Math.sqrt(dx * dx + dy * dy);
         if (distance > state.circleRadius) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
             const angle = Math.atan2(dy, dx);
             const newX = centerX + Math.cos(angle) * state.circleRadius;
             const newY = centerY + Math.sin(angle) * state.circleRadius;
@@ -255,7 +281,7 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
                 canvas.dispatchEvent(event);
             }
         }
-    }
+    }, true);
 
     // =====================
     // Auto Circle: Move mouse in a real circle
@@ -279,9 +305,9 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
         }
     }
 
-    // =====================
-    // Auto Boost: Works on both slither.io and slither.com/io
-    // =====================
+
+
+    // === AUTO BOOST: Works on both slither.io and slither.com/io ===
     function autoBoost() {
         if (!state.features.autoBoost || !state.isInGame) {
             if (state.boosting) {
@@ -300,22 +326,17 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
         }
     }
 
-    // =====================
-    // Minimap
-    // =====================
+    // === MINIMAP (shows your snake as a white dot) ===
     function drawMinimap() {
         if (!state.minimapCanvas) return;
         if (state.features.minimap && state.isInGame) {
             state.minimapCanvas.style.display = 'block';
             const ctx = state.minimapCanvas.getContext('2d');
             ctx.clearRect(0, 0, state.minimapCanvas.width, state.minimapCanvas.height);
-            // Draw map border
             ctx.strokeStyle = "#4CAF50";
             ctx.lineWidth = 2;
             ctx.strokeRect(0, 0, 160, 160);
-            // Draw your snake
-            if (window.snake && window.snake.xx != null && window.snake.yy != null) {
-                // Slither.io map is 21600x21600, center is 10800,10800
+            if (window.snake && typeof window.snake.xx === "number" && typeof window.snake.yy === "number") {
                 const mapSize = 21600;
                 const scale = 160 / mapSize;
                 const x = window.snake.xx * scale;
@@ -332,9 +353,7 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
     }
     drawMinimap();
 
-    // =====================
-    // FPS Counter
-    // =====================
+    // === FPS COUNTER ===
     function fpsCounter() {
         state.fpsFrames++;
         const now = Date.now();
@@ -350,56 +369,72 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
     }
     fpsCounter();
 
-    // =====================
-    // Death Sound
-    // =====================
-    function checkDeath() {
-        if (!state.features.deathSound) {
-            setTimeout(checkDeath, 500);
-            return;
-        }
-        if (window.snake && state.lastSnakeAlive && !window.snake.alive) {
-            state.deathSound.play();
-        }
-        state.lastSnakeAlive = window.snake ? window.snake.alive : false;
-        setTimeout(checkDeath, 500);
+    // === DEATH SOUND (robust: plays on death overlay and snake death) ===
+    function deathSoundObserver() {
+        let lastState = true;
+        setInterval(() => {
+            if (!state.features.deathSound) return;
+            // Play sound if snake just died
+            if (window.snake && lastState && !window.snake.alive) {
+                state.deathSound.pause();
+                state.deathSound.currentTime = 0;
+                state.deathSound.play();
+            }
+            // Play sound if "died" overlay appears
+            const died = document.getElementById('died');
+            if (died && died.style.display !== 'none' && lastState) {
+                state.deathSound.pause();
+                state.deathSound.currentTime = 0;
+                state.deathSound.play();
+            }
+            lastState = window.snake ? window.snake.alive : false;
+        }, 100);
     }
-    setTimeout(checkDeath, 2000);
+    state.deathSound.preload = 'auto';
+    state.deathSound.load();
+    state.deathSound.addEventListener('ended', () => {
+        state.deathSound.currentTime = 0;
+    });
+    deathSoundObserver();
 
-    // =====================
-    // Performance Modes
-    // =====================
+    // === NO GLOW (removes snake glow for FPS, works on .io and .com) ===
+    function noGlowLoop() {
+        if (state.features.noGlow && window.snakes) {
+            for (let s of window.snakes) {
+                if (s && s.rbcs !== undefined) s.rbcs = 0;
+            }
+        }
+        requestAnimationFrame(noGlowLoop);
+    }
+    noGlowLoop();
+
+    // === PERFORMANCE MODES ===
     function applyPerformanceMode() {
-        // Fallback: try to set some common global vars for performance
-        switch (state.features.performanceMode) {
-            case 1: // Low
-                window.high_quality = false;
-                window.render_mode = 1;
-                window.want_quality = 0;
-                break;
-            case 2: // Medium
-                window.high_quality = false;
-                window.render_mode = 2;
-                window.want_quality = 1;
-                break;
-            case 3: // High
-                window.high_quality = true;
-                window.render_mode = 2;
-                window.want_quality = 1;
-                break;
-            case 4: // Ultra
-                window.high_quality = true;
-                window.render_mode = 2;
-                window.want_quality = 1;
-                break;
-            default:
-                break;
+        if (typeof window !== "undefined") {
+            switch (state.features.performanceMode) {
+                case 1: // Low
+                    window.want_quality = 0;
+                    window.high_quality = false;
+                    window.render_mode = 1;
+                    break;
+                case 2: // Medium
+                    window.want_quality = 1;
+                    window.high_quality = false;
+                    window.render_mode = 2;
+                    break;
+                case 3: // High
+                    window.want_quality = 2;
+                    window.high_quality = true;
+                    window.render_mode = 2;
+                    break;
+                default:
+                    break;
+            }
         }
+        updateMenu();
     }
 
-    // =====================
-    // Zoom Lock: Force zoom every frame
-    // =====================
+    // === ZOOM LOCK ===
     function zoomLockLoop() {
         if (typeof window.gsc !== 'undefined') {
             window.gsc = state.zoomFactor;
@@ -408,135 +443,172 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
     }
     zoomLockLoop();
 
-    // =====================
-    // Event Listeners
-    // =====================
-    document.addEventListener('mousemove', restrictToCircle);
+    // === PING DISPLAY ===
+    function pingLoop() {
+        let ping = 0;
+        if (window.lagging && typeof window.lagging === "number") {
+            ping = Math.round(window.lagging);
+        } else if (window.lag && typeof window.lag === "number") {
+            ping = Math.round(window.lag);
+        }
+        state.ping = ping;
+        pingDisplay.textContent = `Ping: ${ping} ms`;
+        const pingValue = document.getElementById("ping-value");
+        if (pingValue) pingValue.textContent = `${ping} ms`;
+        setTimeout(pingLoop, 500);
+    }
+    pingLoop();
 
-    document.addEventListener('keydown', (e) => {
-        const key = e.key.toLowerCase();
-
-        // Toggle menu
-        if (key === 'm') {
-            state.menuVisible = !state.menuVisible;
-            menu.style.display = state.menuVisible ? 'block' : 'none';
-            return;
-        }
-
-        // Circle restriction toggle
-        if (key === 'k') {
-            state.features.circleRestriction = !state.features.circleRestriction;
-            updateMenu();
-            return;
-        }
-
-        // Auto circle toggle
-        if (key === 'a') {
-            state.features.autoCircle = !state.features.autoCircle;
-            updateMenu();
-            return;
-        }
-
-        // Auto boost toggle
-        if (key === 'b') {
-            state.features.autoBoost = !state.features.autoBoost;
-            updateMenu();
-            return;
-        }
-
-        // Rainbow skin toggle
-        if (key === 'r') {
-            state.features.rainbowSkin = !state.features.rainbowSkin;
-            updateMenu();
-            return;
-        }
-
-        // Minimap toggle
-        if (key === 'n') {
-            state.features.minimap = !state.features.minimap;
-            updateMenu();
-            return;
-        }
-
-        // Death sound toggle
-        if (key === 'v') {
-            state.features.deathSound = !state.features.deathSound;
-            updateMenu();
-            return;
-        }
-
-        // Circle size adjustment
-        if (key === 'j') {
-            state.circleRadius = Math.max(config.minCircleRadius, state.circleRadius - config.circleRadiusStep);
-            updateMenu();
-            return;
-        }
-        if (key === 'l') {
-            state.circleRadius = Math.min(config.maxCircleRadius, state.circleRadius + config.circleRadiusStep);
-            updateMenu();
-            return;
-        }
-
-        // Performance modes
-        if (key >= '1' && key <= '4') {
-            state.features.performanceMode = parseInt(key);
-            applyPerformanceMode();
-            updateMenu();
-            return;
-        }
-
-        // FPS display
-        if (key === 'f') {
-            state.features.fpsDisplay = !state.features.fpsDisplay;
-            fpsDisplay.style.display = state.features.fpsDisplay ? 'block' : 'none';
-            updateMenu();
-            return;
-        }
-
-        // Quick links
-        if (key === 'g') {
-            window.open('https://github.com/DXXTHLY', '_blank');
-            return;
-        }
-        if (key === 'd') {
-            window.open('https://dsc.gg/143x', '_blank');
-            return;
-        }
-
-        // Zoom controls
-        if (key === 'z') {
-            state.zoomFactor = Math.max(0.3, state.zoomFactor - 0.05);
-            updateMenu();
-            return;
-        }
-        if (key === 'x') {
-            state.zoomFactor = Math.min(3.0, state.zoomFactor + 0.05);
-            updateMenu();
-            return;
-        }
-        if (key === 'c') {
-            state.zoomFactor = 1.0;
-            updateMenu();
-            return;
+    // === SCREENSHOT BUTTON (P) ===
+    document.addEventListener('keydown', function (e) {
+        if (e.key.toLowerCase() === 'p' && state.isInGame) {
+            try {
+                const canvas = document.querySelector('canvas');
+                if (canvas) {
+                    const dataURL = canvas.toDataURL('image/png');
+                    const a = document.createElement('a');
+                    a.href = dataURL;
+                    a.download = `slitherio_screenshot_${Date.now()}.png`;
+                    a.click();
+                }
+            } catch (err) {
+                alert('Screenshot failed.');
+            }
         }
     });
 
-    // =====================
-    // Main Loop
-    // =====================
+    // === QUICK RESPAWN (U) ===
+    document.addEventListener('keydown', function (e) {
+        if (e.key.toLowerCase() === 'u' && !state.isInGame) {
+            const playBtn = document.getElementById('playh');
+            if (playBtn) playBtn.click();
+            else if (typeof window.play_btn_click === 'function') window.play_btn_click();
+        }
+    });
+
+    // === GET SERVER IP ===
+    function getServerIP() {
+        if (window.bso && window.bso.ip) {
+            state.server = window.bso.ip;
+        } else if (window.bso && window.bso.url) {
+            state.server = window.bso.url;
+        } else {
+            state.server = '';
+        }
+    }
+    setInterval(getServerIP, 1000);
+
+    // === GET LEADERBOARD ===
+    function getLeaderboard() {
+        // Try to get leaderboard names from the DOM
+        const lb = [];
+        for (let i = 1; i <= 3; ++i) {
+            const el = document.getElementById('lb' + i);
+            if (el && el.textContent) lb.push(el.textContent.trim());
+        }
+        state.leaderboard = lb;
+    }
+    setInterval(getLeaderboard, 1000);
+
+    // === MAIN LOOPS ===
     function mainLoop() {
         if (state.features.autoCircle && state.isInGame) autoCircle();
-        if (state.features.autoBoost && state.isInGame) autoBoost();
-        else if (!state.features.autoBoost && state.boosting) {
-            state.boosting = false;
-            if (typeof window.setAcceleration === 'function') window.setAcceleration(0);
-            document.dispatchEvent(new KeyboardEvent('keyup', { key: ' ' }));
-        }
+        autoBoost();
         requestAnimationFrame(mainLoop);
     }
     mainLoop();
 
+    // === KEYBOARD SHORTCUTS ===
+    document.addEventListener('keydown', function (e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        switch (e.key.toLowerCase()) {
+            case 'm':
+                state.menuVisible = !state.menuVisible;
+                menu.style.display = state.menuVisible ? 'block' : 'none';
+                break;
+            case 'k':
+                state.features.circleRestriction = !state.features.circleRestriction;
+                updateMenu();
+                break;
+            case 'j':
+                state.circleRadius = Math.max(config.minCircleRadius, state.circleRadius - config.circleRadiusStep);
+                updateMenu();
+                break;
+            case 'l':
+                state.circleRadius = Math.min(config.maxCircleRadius, state.circleRadius + config.circleRadiusStep);
+                updateMenu();
+                break;
+            case 'a':
+                state.features.autoCircle = !state.features.autoCircle;
+                if (state.features.autoCircle) {
+                    if (!autoCircleRAF) autoCircle();
+                } else {
+                    if (autoCircleRAF) {
+                        cancelAnimationFrame(autoCircleRAF);
+                        autoCircleRAF = null;
+                    }
+                }
+                updateMenu();
+                break;
+
+
+            case 'b':
+                state.features.autoBoost = !state.features.autoBoost;
+                updateMenu();
+                break;
+            case 'z':
+                state.zoomFactor = Math.max(0.3, state.zoomFactor - 0.1);
+                updateMenu();
+                break;
+            case 'x':
+                state.zoomFactor = Math.min(2.0, state.zoomFactor + 0.1);
+                updateMenu();
+                break;
+            case 'c':
+                state.zoomFactor = 1.0;
+                updateMenu();
+                break;
+            case '1':
+            case '2':
+            case '3':
+                state.features.performanceMode = parseInt(e.key);
+                applyPerformanceMode();
+                break;
+            case 'f':
+                state.features.fpsDisplay = !state.features.fpsDisplay;
+                fpsDisplay.style.display = state.features.fpsDisplay ? 'block' : 'none';
+                updateMenu();
+                break;
+            case 'n':
+                state.features.minimap = !state.features.minimap;
+                updateMenu();
+                break;
+            case 'v':
+                state.features.deathSound = !state.features.deathSound;
+                updateMenu();
+                break;
+            case 'h':
+                state.features.noGlow = !state.features.noGlow;
+                updateMenu();
+                break;
+            case 't':
+                state.features.showServer = !state.features.showServer;
+                updateMenu();
+                break;
+            case 'g':
+                window.open('https://github.com/Dxxthly', '_blank');
+                break;
+            case 'd':
+                window.open('https://dsc.gg/143x', '_blank');
+                break;
+        }
+    });
+
+    // === INITIAL SETUP ===
+    applyPerformanceMode();
+
 })();
+
 
 
 ```
