@@ -18,11 +18,7 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
 3. **Install the Script**:
    - Open Tampermonkey dashboard
    - Click "Utilities" tab
-   - Paste the following code into the "Import from URL" field:
-     ```
-     https://github.com/DXXTHLY/SlitherIOModMenu/blob/main/README.md
-     ```
-   - OR manually create a new script and paste the code below
+   - Paste the following code into "Create New Script":
 
 ## Script Codes
 
