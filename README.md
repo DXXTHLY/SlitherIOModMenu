@@ -22,8 +22,7 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
 
 ## Script Codes
 
-```javascript
-// ==UserScript==
+```javascript// ==UserScript==
 // @name         DSC.GG/143X ULTIMATE MOD MENU (Stable v9.0)
 // @namespace    http://tampermonkey.net/
 // @version      9.0
