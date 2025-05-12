@@ -197,10 +197,10 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
                     <h3 style="color:#4CAF50;border-bottom:1px solid #444;padding-bottom:5px;margin-top:0">VISUALS</h3>
                     <p><strong>1-3: Performance Mode</strong> <span style="color:${['lime','cyan','orange'][state.features.performanceMode-1] || '#aaa'}">${['Low: Minimal','Medium: Balanced','High: Quality'][state.features.performanceMode-1] || 'Off'}</span></p>
                     <p><strong>F: FPS Display:</strong> <span style="color:${state.features.fpsDisplay ? 'lime' : 'red'}">${state.features.fpsDisplay ? 'ON' : 'OFF'}</span></p>
-                    <p><strong>N: Minimap:</strong> <span style="color:${state.features.minimap ? 'lime' : 'red'}">${state.features.minimap ? 'ON' : 'OFF'}</span></p>
-                    <p><strong>V: Death Sound:</strong> <span style="color:${state.features.deathSound ? 'lime' : 'red'}">${state.features.deathSound ? 'ON' : 'OFF'}</span></p>
-                    <p><strong>U: Quick Respawn</strong></p>
-                    <p><strong>H: No Glow:</strong> <span style="color:${state.features.noGlow ? 'lime' : 'red'}">${state.features.noGlow ? 'ON' : 'OFF'}</span></p>
+                    <p><strong>N: UPDATING:</strong> <span style="color:${state.features.minimap ? 'lime' : 'red'}">${state.features.minimap ? 'ON' : 'OFF'}</span></p>
+                    <p><strong>V: UPDATING:</strong> <span style="color:${state.features.deathSound ? 'lime' : 'red'}">${state.features.deathSound ? 'ON' : 'OFF'}</span></p>
+                    <p><strong>U: UPDATING:</strong></p>
+                    <p><strong>H: UPDATING:</strong> <span style="color:${state.features.noGlow ? 'lime' : 'red'}">${state.features.noGlow ? 'ON' : 'OFF'}</span></p>
                     <p><strong>T: Show Server IP:</strong> <span style="color:${state.features.showServer ? 'lime' : 'red'}">${state.features.showServer ? 'ON' : 'OFF'}</span></p>
                     <h3 style="color:#4CAF50;border-bottom:1px solid #444;padding-bottom:5px;margin-top:15px">LINKS</h3>
                     <p><strong>G: GitHub</strong></p>
