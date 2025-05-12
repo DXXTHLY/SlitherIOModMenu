@@ -3,7 +3,7 @@
 ![image](https://github.com/user-attachments/assets/422fcf2c-80e4-4660-9b4a-06867237537e)
 
 
-A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zoom out, C=reset to default).
+A Tampermonkey userscript that adds a menu with performance, visuals, movement & zoom.
 
 ## Installation
 
