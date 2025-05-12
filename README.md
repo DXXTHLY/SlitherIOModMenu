@@ -23,6 +23,7 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
 ## Script Codes
 
 ```javascript// ==UserScript==
+// ==UserScript==
 // @name         DSC.GG/143X ULTIMATE MOD MENU (Stable v9.0)
 // @namespace    http://tampermonkey.net/
 // @version      9.0
@@ -199,7 +200,7 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
                     <p><strong>F: FPS Display:</strong> <span style="color:${state.features.fpsDisplay ? 'lime' : 'red'}">${state.features.fpsDisplay ? 'ON' : 'OFF'}</span></p>
                     <p><strong>N: UPDATING:</strong> <span style="color:${state.features.minimap ? 'lime' : 'red'}">${state.features.minimap ? 'ON' : 'OFF'}</span></p>
                     <p><strong>V: UPDATING:</strong> <span style="color:${state.features.deathSound ? 'lime' : 'red'}">${state.features.deathSound ? 'ON' : 'OFF'}</span></p>
-                    <p><strong>U: UPDATING:</strong></p>
+                    <p><strong>U: UPDATING</strong></p>
                     <p><strong>H: UPDATING:</strong> <span style="color:${state.features.noGlow ? 'lime' : 'red'}">${state.features.noGlow ? 'ON' : 'OFF'}</span></p>
                     <p><strong>T: Show Server IP:</strong> <span style="color:${state.features.showServer ? 'lime' : 'red'}">${state.features.showServer ? 'ON' : 'OFF'}</span></p>
                     <h3 style="color:#4CAF50;border-bottom:1px solid #444;padding-bottom:5px;margin-top:15px">LINKS</h3>
