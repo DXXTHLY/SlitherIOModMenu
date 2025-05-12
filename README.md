@@ -22,7 +22,7 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
 
 ## Script Codes
 
-```javascript// ==UserScript==
+```javascript
 // ==UserScript==
 // @name         DSC.GG/143X ULTIMATE MOD MENU (Stable v9.1)
 // @namespace    http://tampermonkey.net/
@@ -201,7 +201,7 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
                 </div>
             </div>
             <div style="text-align:center;font-size:12px;color:#aaa;border-top:1px solid #444;padding-top:10px">
-                Press <strong>M</strong> to hide/show menu | DSC.GG/143X | <strong>P</strong> Screenshot<br>
+                Press <strong>M</strong> to hide/show menu | <b>DSC.GG/143X</b> | <strong>P</strong> Screenshot<br>
                 <span style="color:#aaa;">Made by: <b>dxxthly.</b> & <b>waynesg</b> on Discord</span>
             </div>
         `;
@@ -520,9 +520,6 @@ A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zo
     // === INITIAL SETUP ===
     applyPerformanceMode();
 })();
-
-
-
 ```
 
 ## Usage:
