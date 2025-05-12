@@ -1,5 +1,8 @@
 # Slither.io Enhanced Zoom Control
 
+![image](https://github.com/user-attachments/assets/d1e96c85-85aa-4be3-a70b-f7fcf4c0f768)
+
+
 A Tampermonkey userscript that adds zoom controls to Slither.io (Z=zoom in, X=zoom out, C=reset to default).
 
 ## Installation
