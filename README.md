@@ -4,8 +4,10 @@
 [![Download on GreasyFork](https://img.shields.io/badge/Download-GreasyFork-brightgreen)](https://greasyfork.org/en/scripts/535770-slither-io-mod-menu-w-chat-dsc-gg-143x-vx)
 [![Discord Support](https://img.shields.io/badge/Discord-Support-7289DA)](https://dsc.gg/143x)  
 [![Donate via PayPal](https://img.shields.io/badge/Donate-PayPal-00457C)](https://www.paypal.com/donate/?business=SC3RFTW5QDZJ4&no_recurring=0&currency_code=USD)
-
 > Help fund the project to keep it going! Any donations are greatly appreciated.
+
+![image](https://github.com/user-attachments/assets/040dc9f8-9579-4651-888a-abe5a4a2092b)
+
 
 ## Known Bugs
 - Trail detaches from cursor when zooming out
